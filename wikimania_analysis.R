@@ -25,7 +25,7 @@ all_set <- rbind(first_set, second_set) %>%
          change = case_when(is.na(change)~ 0,
                             TRUE ~ as.numeric(change)),
          cum = cumsum(change)) %>% 
-  mutate(date = date(date_time)) %>% 
+  mutate(date = date(date_time)) %>%  
   group_by(date) %>% 
   add_tally(name="edit_day") %>% 
   group_by(user_name) %>% 
@@ -114,6 +114,13 @@ smaller_set <- small_set %>%
 
 View(smaller_set)
 
+number_of_edits <- smaller_set %>% 
+  ungroup() %>% 
+    select(edit_day, date) %>% 
+  group_by_all() %>% 
+  summarise()
+View(number_of_edits)
+
 options(scipen = 999)
 
 
@@ -164,7 +171,26 @@ polar_chart
 
 ggsave("polar_chart.svg", polar_chart, width=33, height = 33, units="cm")
 
+mini <- theme(
+  axis.line = element_line(colour="#EFEDE4", linewidth = .2),
+  panel.grid = element_line(colour="#EFEDE4", linewidth = .1),
+  axis.text = element_text(size = 10, colour= "#C4C4C4"),
+  axis.title = element_blank())
+                
 
+
+daily_edits <- ggplot(number_of_edits, aes(date, edit_day))+
+  geom_area(alpha=.8, fill="#FBEDBD")+
+
+  theme_minimal()+
+  mini+
+  scale_x_date(date_labels = "%b %d", date_breaks = "4 days", limits = c(ymd("2011-01-24"),ymd("2011-02-28")), expand=c(0,0))+
+  theme(panel.grid.minor.y =  element_blank())
+    
+  
+  daily_edits
+
+ggsave("daily_edits.svg", daily_edits, width=15, height = 3.9, units="cm")
 
 area_theme_cart <- theme(panel.background= element_rect(fill="black"),
                          axis.line = element_line(colour="#EFEDE4", linewidth = .2),
@@ -196,6 +222,8 @@ size_change_all
 ggsave("cart_chart.svg", size_change_all, width=54, height = 13, units="cm")
 
 
+
+
 edit_theme <- theme(panel.background= element_rect(fill="black"),
                     axis.line = element_line(colour="#EFEDE4", linewidth = .2),
                     panel.grid = element_line(colour="#EFEDE4", linewidth = .1),
@@ -210,30 +238,35 @@ edit_theme <- theme(panel.background= element_rect(fill="black"),
 )
 
 edit_theme2 <- theme(axis.line = element_line(colour="#EFEDE4", linewidth = .2),
-                    panel.grid = element_line(colour="#EFEDE4", linewidth = .1),
+                    panel.grid.major.x = element_line(colour="#EFEDE4", linewidth = .1),
+                    panel.grid.minor.x = element_line(colour="#EFEDE4", linewidth = .1),
+                    panel.grid.minor.y = element_blank(),
+                    panel.grid.major.y = element_blank(),
                     axis.text.x = element_text(vjust = -1, size = 8, colour= "#C4C4C4"),
                     axis.text.y = element_blank(),
                     strip.text.y = element_blank(),
                     # strip.text.y.left = element_text(angle = 0, hjust = 1),
                     axis.title = element_blank(),
-                    panel.grid.minor.x = element_blank(),
+                    # panel.grid = element_blank(),
                     legend.position = "none",
 )
 
 edit_range_gant <- ggplot(users_edits_summary_top) +
-  geom_segment(aes(x=firstdate, xend=lastdate, y=0, yend=0), colour = "#917E7E", linewidth = 1)+
+  geom_segment(aes(x=firstdate, xend=lastdate, y=0, yend=0), colour = "#FBEDBD", linewidth = 1)+
   geom_segment(data=users_edits_all_top,aes(x=date_time, xend=date_time, y=-1.5, yend=1.5, colour = change >0), linewidth=.5)+
   facet_grid(user_name ~., switch = "y")+
   theme_minimal()+
-  edit_theme+
+  edit_theme2+
   scale_y_continuous(limits = c(-2, 4), breaks = 1)+
   geom_text(data=users_edits_summary_top, aes(label=edit_label, x=firstdate, y=3.2), colour="#EFEDE4", hjust=0)+
-  scale_x_datetime(limits = c(ymd_hms("2011-01-01 00:00:00"),ymd_hms ("2023-05-31 00:00:00")), expand=c(0,0))
+  scale_x_datetime(date_labels = "%Y", date_breaks = "1 year",limits = c(ymd_hms("2011-01-01 00:00:00"),ymd_hms ("2023-05-31 00:00:00")), expand=c(0,0))
 
 
 edit_range_gant
 
-ggsave("edit_range_gant.svg", edit_range_gant, width=54, height = 13, units="cm")
+ggsave("edit_range_gant.svg", edit_range_gant, width=54, height = 15, units="cm")
+
+
 
 
 # edit_range_point <- ggplot(users_edits_summary_top) +
