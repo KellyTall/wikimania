@@ -2,7 +2,7 @@
 
 Poster created for Wikimania 2023, Singapore. 
 
-Inspired by _Writing the Revolution_ by Heather Ford
+Inspired by _Writing the Revolution_ by Heather Ford https://mitpress.mit.edu/9780262046299/writing-the-revolution/
 
 Includes R script to extract data and ggplot files for the charts
 
